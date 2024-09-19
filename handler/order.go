@@ -15,7 +15,7 @@ func(o *Order) Create(w http.ResponseWriter, r *http.Request){
 }
 
 func(o *Order) List(w http.ResponseWriter, r *http.Request){
-	fmt.Println("List alll orders")
+	fmt.Println("List all orders")
 }
 
 func(o *Order) GetbyID(w http.ResponseWriter, r *http.Request){
