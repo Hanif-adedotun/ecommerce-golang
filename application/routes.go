@@ -3,13 +3,14 @@ package application
 import (
 	"net/http"
 
+	"github.com/hanif-adedotun/ecommerce-golang/db"
 	"github.com/hanif-adedotun/ecommerce-golang/handler"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func loadRoutes() *chi.Mux {
+func (a *App) loadRoutes(){
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 
@@ -17,13 +18,17 @@ func loadRoutes() *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/orders", loadOrderRoute)
+	router.Route("/orders", a.loadOrderRoute)
 
-	return router
+	a.router = router
 }
 
-func loadOrderRoute(router chi.Router) {
-	orderHandler := &handler.Order{}
+func (a *App) loadOrderRoute(router chi.Router) {
+	orderHandler := &handler.Order{
+		Repo : &db.PostgreRepo{
+			Client: a.db,
+		},
+	}
 
 	// All routes for the order handler 
 	// All path is orders/

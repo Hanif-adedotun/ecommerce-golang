@@ -15,6 +15,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+
 // connectTCPSocket initializes a TCP connection pool for a Cloud SQL
 // instance of Postgres.
 func ConnectDB() (*sql.DB, error) {
@@ -49,6 +50,8 @@ func ConnectDB() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
+
+	// Create our orders table
 
 	fmt.Println("Postgres DB Connected successfully")
 
