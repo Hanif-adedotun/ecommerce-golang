@@ -170,3 +170,16 @@ The following unit test is used to test the Order model.
 - time
 - github.com/google/uuid
 - encoding/json
+```markdown
+### Test Cases
+The following test cases cover the core functionality of the `Order` struct.
+*   Test that an `Order` with valid data is properly formatted as a string.
+*   Test that an `Order` with empty `LineItems` is properly formatted as a string.
+```
+
+
+## Required Packages
+- testing
+- reflect
+- time
+- github.com/google/uuid
