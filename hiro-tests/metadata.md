@@ -183,3 +183,15 @@ The following test cases cover the core functionality of the `Order` struct.
 - reflect
 - time
 - github.com/google/uuid
+# Order Test
+This test suite covers the Order handler functions. It checks the following scenarios:
+*   TestOrderCreate: Tests that a new order can be created successfully.
+*   TestOrderCreateError: Tests that an error occurs when the request body is invalid.
+*   TestOrderCreateRepoError: Tests that an error occurs when the repository fails to insert the order.
+
+
+## Required Packages
+- net/http
+- net/http/httptest
+- testing
+- strings
