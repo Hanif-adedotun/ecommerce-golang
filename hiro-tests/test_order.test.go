@@ -1,86 +1,71 @@
-package handler
+package model
 
 import (
-	"context"
-	"database/sql"
-	"encoding/json"
-	"math/rand"
-	"net/http"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hanif-adedotun/ecommerce-golang/db"
-	"github.com/hanif-adedotun/ecommerce-golang/model"
 )
 
-// MockPostgreRepo implements minimal repository functionality for testing
-.type MockPostgreRepo struct{}
+func TestOrder(t *testing.T) {
+	// Arrange
+	orderID := uint64(1)
+	customerID := uuid.New()
+	createdAt := time.Now()
+	shippedAt := time.Now()
+	deliveredAt := time.Now()
+	lineItem := LineItem{
+		ItemID:   uuid.New(),
+		Quantity: 2,
+		Price:    10,
+	}
+	order := Order{
+		OrderID:    orderID,
+		CustomerID: customerID,
+		LineItems:  []LineItem{lineItem},
+		CreatedAt: &createdAt,
+		ShippedAt: &shippedAt,
+		DeliveredAt: &deliveredAt,
+	}
 
-// Insert mocks the insert operation
-func (m *MockPostgreRepo) Insert(ctx context.Context, order model.Order) (uint64, error) {
-	// Return a fixed ID for consistent testing
-	return 1, nil
-}
+	// Act
+	jsonOrder, err := json.Marshal(order)
+	if err != nil {
+		t.Errorf("failed to marshal order: %w", err)
+	}
 
-func TestCreate(t *testing.T) {
-	t.Run("valid order creation", func(t *testing.T) {
-		// Arrange
-		repo := &MockPostgreRepo{}
-		handler := &Order{Repo: repo}
-		w := http.ResponseWriter(nil)
-		r := http.NewRequest("POST", "/orders", nil)
+	var unmarshaledOrder Order
+	err = json.Unmarshal(jsonOrder, &unmarshaledOrder)
+	if err != nil {
+		t.Errorf("failed to unmarshal order: %w", err)
+	}
 
-		// Create a valid order
-		body := model.Order{
-			OrderID:    1,
-			CustomerID: uuid.New(),
-			LineItems: []model.LineItem{{
-				ProductID: 1,
-				Quantity:  2,
-			}},
-		}
-
-		// Serialize to JSON
-		jsonBody, _ := json.Marshal(body)
-		r.Body = json.NewBuffer(jsonBody)
-
-		// Act
-		handler.Create(w, r)
-
-		// Assert
-		// Check if response code is as expected
-		// Implement assertion logic
-	})
-
-	t.Run("invalid json format", func(t *testing.T) {
-		// Arrange
-		repo := &MockPostgreRepo{}
-		handler := &Order{Repo: repo}
-		w := http.ResponseWriter(nil)
-		r := http.NewRequest("POST", "/orders", nil)
-
-		// Act
-		handler.Create(w, r)
-
-		// Assert
-		// Check if response code is 400 Bad Request
-	})
-
-	t.Run("database error", func(t *testing.T) {
-		// Arrange
-		repo := &MockPostgreRepo{}
-		handler := &Order{Repo: repo}
-		w := http.ResponseWriter(nil)
-		r := http.NewRequest("POST", "/orders", nil)
-
-		// Force an error from the repository layer
-		// Implement error scenario
-
-		// Act
-		handler.Create(w, r)
-
-		// Assert
-		// Check if response code is 500 Internal Server Error
-	})
+	// Assert
+	if unmarshaledOrder.OrderID != orderID {
+		t.Errorf("expected order ID %d, but got %d", orderID, unmarshaledOrder.OrderID)
+	}
+	if unmarshaledOrder.CustomerID != customerID {
+		t.Errorf("expected customer ID %s, but got %s", customerID, unmarshaledOrder.CustomerID)
+	}
+	if len(unmarshaledOrder.LineItems) != 1 {
+		t.Errorf("expected 1 line item, but got %d", len(unmarshaledOrder.LineItems))
+	}
+	if unmarshaledOrder.LineItems[0].ItemID != lineItem.ItemID {
+		t.Errorf("expected item ID %s, but got %s", lineItem.ItemID, unmarshaledOrder.LineItems[0].ItemID)
+	}
+	if unmarshaledOrder.LineItems[0].Quantity != lineItem.Quantity {
+		t.Errorf("expected quantity %d, but got %d", lineItem.Quantity, unmarshaledOrder.LineItems[0].Quantity)
+	}
+	if unmarshaledOrder.LineItems[0].Price != lineItem.Price {
+		t.Errorf("expected price %d, but got %d", lineItem.Price, unmarshaledOrder.LineItems[0].Price)
+	}
+	if unmarshaledOrder.CreatedAt == nil || unmarshaledOrder.CreatedAt.Format(time.RFC3339) != createdAt.Format(time.RFC3339) {
+		t.Errorf("expected created at %s, but got %s", createdAt, unmarshaledOrder.CreatedAt)
+	}
+	if unmarshaledOrder.ShippedAt == nil || unmarshaledOrder.ShippedAt.Format(time.RFC3339) != shippedAt.Format(time.RFC3339) {
+		t.Errorf("expected shipped at %s, but got %s", shippedAt, unmarshaledOrder.ShippedAt)
+	}
+	if unmarshaledOrder.DeliveredAt == nil || unmarshaledOrder.DeliveredAt.Format(time.RFC3339) != deliveredAt.Format(time.RFC3339) {
+		t.Errorf("expected delivered at %s, but got %s", deliveredAt, unmarshaledOrder.DeliveredAt)
+	}
 }
