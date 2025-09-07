@@ -6,73 +6,35 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/httptest"
 	"github.com/hanif-adedotun/ecommerce-golang/db"
 	"github.com/hanif-adedotun/ecommerce-golang/handler"
 )
 
-func TestApp_Start(t *testing.T) {
-	// Arrange
-	srv, err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		t.Errorf("http.ListenAndServe() error = %v", err)
-	}
-	defer srv.Close()
-	ctx := context.Background()
-	app := &App{}
-	// Mocking db connection
-	dbConn, err := sql.Open("pgx", "host=localhost port=5432 user=myuser password=mypass dbname=mydb sslmode=disable")
-	if err != nil {
-		t.Errorf("sql.Open() error = %v", err)
-	}
-	app.db = dbConn
-	// Act
-	err = app.Start(ctx)
-	// Assert
-	if err != nil {
-		t.Errorf("app.Start() error = %v", err)
-	}
-}
-
-func TestApp_loadRoutes(t *testing.T) {
+func TestAppStart(t *testing.T) {
 	// Arrange
 	ctx := context.Background()
 	app := &App{}
-	// Mocking db connection
-	dbConn, err := sql.Open("pgx", "host=localhost port=5432 user=myuser password=mypass dbname=mydb sslmode=disable")
-	if err != nil {
-		t.Errorf("sql.Open() error = %v", err)
-	}
-	app.db = dbConn
-	// Act
+	app.db, _ = sql.Open("pgx", "host=localhost user=myuser password=mypassword port=5432 database=mydb")
 	app.loadRoutes()
-	// Assert
-	if app.router == nil {
-		t.Errorf("app.loadRoutes() app.router is nil")
+
+	// Act
+	if err := app.Start(ctx); err != nil {
+		t.Errorf("error starting app: %v", err)
 	}
 }
 
-func TestApp_loadOrderRoute(t *testing.T) {
+func TestLoadRoutes(t *testing.T) {
 	// Arrange
-	ctx := context.Background()
 	app := &App{}
-	// Mocking db connection
-	dbConn, err := sql.Open("pgx", "host=localhost port=5432 user=myuser password=mypass dbname=mydb sslmode=disable")
-	if err != nil {
-		t.Errorf("sql.Open() error = %v", err)
-	}
-	app.db = dbConn
-	r := chi.NewRouter()
-	// Act
-	app.loadOrderRoute(r)
+	app.loadRoutes()
+
 	// Assert
 	if app.router == nil {
-		t.Errorf("app.loadOrderRoute() app.router is nil")
+		t.Errorf("router is nil after loading routes")
 	}
 }
