@@ -5,23 +5,45 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hanif-adedotun/ecommerce-golang/db"
+	"github.com/hanif-adedotun/ecommerce-golang/handler"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func TestLoadRoutes(t *testing.T) {
-	app := &App{}
-	app.loadRoutes()
-	if app.router == nil {
-		t.Errorf("loadRoutes() router is nil")
+	// Arrange
+	a := &App{}
+	a.db, _ = sql.Open("pgx", "")
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+
+	// Act
+	a.loadRoutes()
+	a.router.ServeHTTP(w, r)
+
+	// Assert
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, w.Code)
 	}
 }
 
 func TestLoadOrderRoute(t *testing.T) {
-	app := &App{db: &sql.DB{}}
+	// Arrange
+	a := &App{}
+	a.db, _ = sql.Open("pgx", "")
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/orders", nil)
+	ctx := chi.NewRouteContext()
+	ctx.URLParams.Add("id", "1")
+
+	// Act
 	router := chi.NewRouter()
-	app.loadOrderRoute(router)
-	if router == nil {
-		t.Errorf("loadOrderRoute() router is nil")
+	a.loadOrderRoute(router)
+	router.ServeHTTP(w, r)
+
+	// Assert
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, w.Code)
 	}
 }
