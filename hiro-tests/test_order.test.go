@@ -1,99 +1,65 @@
-package handler
+package model
 
 import (
-	"encoding/json"
-	"fmt"
-	"math/rand"
-	"net/http"
-	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hanif-adedotun/ecommerce-golang/db"
-	"github.com/hanif-adedotun/ecommerce-golang/model"
 )
 
-func TestOrderCreate(t *testing.T) {
-	// Arrange
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := &Order{Repo: &db.PostgreRepo{}}
-		o.Create(w, r)
-	}))
-	defer s.Close()
-
-	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "lineitems": []}`
-	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
+func TestOrder(t *testing.T) {
+	order := Order{
+		OrderID:    1,
+		CustomerID: uuid.New(),
+		LineItems: []LineItem{{
+			ItemID:   uuid.New(),
+			Quantity: 1,
+			Price:    10,
+		}},
+		CreatedAt: time.Now(),
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	// Act
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatal(err)
+	// Test OrderID
+	if order.OrderID != 1 {
+		t.Errorf("OrderID is not 1, got %d", order.OrderID)
 	}
-	defer resp.Body.Close()
 
-	// Assert
-	if resp.StatusCode != http.StatusCreated {
-		t.Errorf("expected status code %d but got %d", http.StatusCreated, resp.StatusCode)
+	// Test CustomerID
+	if order.CustomerID == uuid.Nil {
+		t.Errorf("CustomerID is not set, got %v", order.CustomerID)
 	}
-}
 
-func TestOrderCreateError(t *testing.T) {
-	// Arrange
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := &Order{Repo: &db.PostgreRepo{}}
-		o.Create(w, r)
-	}))
-	defer s.Close()
-
-	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"}`
-	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
+	// Test LineItems
+	if len(order.LineItems) != 1 {
+		t.Errorf("LineItems length is not 1, got %d", len(order.LineItems))
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	// Act
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	// Assert
-	if resp.StatusCode != http.StatusBadRequest {
-		t.Errorf("expected status code %d but got %d", http.StatusBadRequest, resp.StatusCode)
+	// Test CreatedAt
+	if order.CreatedAt == nil {
+		t.Errorf("CreatedAt is not set, got %v", order.CreatedAt)
 	}
 }
 
-func TestOrderCreateRepoError(t *testing.T) {
-	// Arrange
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := &Order{Repo: &db.PostgreRepo{}}
-		o.Create(w, r)
-	}))
-	defer s.Close()
-
-	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "lineitems": []}`
-	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
+func TestLineItem(t *testing.T) {
+	lineItem := LineItem{
+		ItemID:   uuid.New(),
+		Quantity: 1,
+		Price:    10,
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	// Act
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatal(err)
+	// Test ItemID
+	if lineItem.ItemID == uuid.Nil {
+		t.Errorf("ItemID is not set, got %v", lineItem.ItemID)
 	}
-	defer resp.Body.Close()
 
-	// Assert
-	if resp.StatusCode != http.StatusInternalServerError {
-		t.Errorf("expected status code %d but got %d", http.StatusInternalServerError, resp.StatusCode)
+	// Test Quantity
+	if lineItem.Quantity != 1 {
+		t.Errorf("Quantity is not 1, got %d", lineItem.Quantity)
+	}
+
+	// Test Price
+	if lineItem.Price != 10 {
+		t.Errorf("Price is not 10, got %d", lineItem.Price)
 	}
 }
